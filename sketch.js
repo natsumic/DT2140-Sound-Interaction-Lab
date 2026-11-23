@@ -32,9 +32,6 @@ let turntimer = 0;
 //==========================================================================================
 
 function contextAudioStart() {
-  if (!dspNode) {
-    return;
-  }
   if (audioContext.state === 'suspended') {
     audioContext.resume();
     // startDsp();
