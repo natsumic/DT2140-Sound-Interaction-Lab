@@ -18,7 +18,7 @@
  const volumeDepth = audioContext.createGain();
 
  oscillator.type = "sine";
- oscillator.frequency.value = 440;
+ oscillator.frequency.value = 1200;
 
  volumeOscillator.type = "sine";
  volumeOscillator.frequency.value = 1;
