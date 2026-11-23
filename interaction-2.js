@@ -60,8 +60,8 @@ function accelerationChange(accx, accy, accz) {
     let intensity = Math.sqrt(accx * accx + accy * accy + accz * accz);
     let force = Math.min(intensity / 50, 1);
 
-    dspNode.setParamValue("/wind/wind/force", 0.2 + force);
-    dspNode.setParamValue("/wind/volume", 0.2 + force);
+    dspNode.setParamValue("/wind/wind/force", force);
+    dspNode.setParamValue("/wind/volume", force);
 }
 
 
