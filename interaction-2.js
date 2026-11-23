@@ -52,6 +52,8 @@ wind.createDSP(audioContext, 1024)
 //==========================================================================================
 
 function accelerationChange(accx, accy, accz) {
+    let intensity = Math.sqrt(accx * accx + accy * accy + accz * accz);
+    let force = Math.min(intensity / 50, 1);
     // playAudio()
 }
 
@@ -100,7 +102,7 @@ function playAudio() {
         return;
     }
 
-    dspNode.setParamValue("/wind/force", 0.5);
+    dspNode.setParamValue("/wind/force", force);
     dspNode.setParamValue("/volume", 0.7);
 }
 
