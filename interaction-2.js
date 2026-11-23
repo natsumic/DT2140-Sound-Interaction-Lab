@@ -51,11 +51,19 @@ wind.createDSP(audioContext, 1024)
 //
 //==========================================================================================
 
+
 function accelerationChange(accx, accy, accz) {
+    if (!dspNode || audioContext.state === 'suspended') {
+        return;
+    }
+
     let intensity = Math.sqrt(accx * accx + accy * accy + accz * accz);
     let force = Math.min(intensity / 50, 1);
-    // playAudio()
+
+    dspNode.setParamValue("/wind/force", force);
+    dspNode.setParamValue("/volume", force);
 }
+
 
 function rotationChange(rotx, roty, rotz) {
 }
@@ -76,7 +84,7 @@ function deviceTurned() {
 function deviceShaken() {
     shaketimer = millis();
     statusLabels[0].style("color", "pink");
-    playAudio();
+    //playAudio();
 }
 
 function getMinMaxParam(address) {
@@ -97,14 +105,8 @@ function getMinMaxParam(address) {
 //
 //==========================================================================================
 
-function playAudio() {
-    if (!dspNode || audioContext.state === 'suspended') {
-        return;
-    }
-
-    dspNode.setParamValue("/wind/force", force);
-    dspNode.setParamValue("/volume", force);
-}
+//function playAudio() {
+//}
 
 
 //==========================================================================================
