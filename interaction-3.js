@@ -1,111 +1,107 @@
-//==========================================================================================
-// AUDIO SETUP
-//------------------------------------------------------------------------------------------
-//
-//------------------------------------------------------------------------------------------
-// Edit just where you're asked to!
-//------------------------------------------------------------------------------------------
-//
-//==========================================================================================
-let dspNode = null;
-let dspNodeParams = null;
-let jsonParams = null;
 
-// Change here to ("tuono") depending on your wasm file name
-const dspName = "brass";
-const instance = new FaustWasm2ScriptProcessor(dspName);
+ //==========================================================================================
+ // AUDIO SETUP
+ //------------------------------------------------------------------------------------------
+ //
+ //------------------------------------------------------------------------------------------
+ // Edit just where you're asked to!
+ //------------------------------------------------------------------------------------------
+ //
+ //==========================================================================================
+ let dspNode = null;
+ let dspNodeParams = null;
+ let jsonParams = null;
 
-// output to window or npm package module
-if (typeof module === "undefined") {
-    window[dspName] = instance;
-} else {
-    const exp = {};
-    exp[dspName] = instance;
-    module.exports = exp;
-}
+ const oscillator = audioContext.createOscillator();
+ const volumeOscillator = audioContext.createOscillator();
+ const gainNode = audioContext.createGain();
+ const volumeDepth = audioContext.createGain();
 
-// The name should be the same as the WASM file, so change tuono with brass if you use brass.wasm
-brass.createDSP(audioContext, 1024)
-    .then(node => {
-        dspNode = node;
-        dspNode.connect(audioContext.destination);
-        console.log('params: ', dspNode.getParams());
-        const jsonString = dspNode.getJSON();
-        jsonParams = JSON.parse(jsonString)["ui"][0]["items"];
-        dspNodeParams = jsonParams
-        // const exampleMinMaxParam = findByAddress(dspNodeParams, "/thunder/rumble");
-        // // ALWAYS PAY ATTENTION TO MIN AND MAX, ELSE YOU MAY GET REALLY HIGH VOLUMES FROM YOUR SPEAKERS
-        // const [exampleMinValue, exampleMaxValue] = getParamMinMax(exampleMinMaxParam);
-        // console.log('Min value:', exampleMinValue, 'Max value:', exampleMaxValue);
-    });
+ oscillator.type = "sine";
+ oscillator.frequency.value = 440;
+
+ volumeOscillator.type = "sine";
+ volumeOscillator.frequency.value = 1;
+
+ gainNode.gain.value = 0.1;
+ volumeDepth.gain.value = 0.1;
+
+ oscillator.connect(gainNode);
+ volumeOscillator.connect(volumeDepth);
+ volumeDepth.connect(gainNode.gain);
+ gainNode.connect(audioContext.destination);
+
+ oscillator.start();
+ volumeOscillator.start();
 
 
-//==========================================================================================
-// INTERACTIONS
-//------------------------------------------------------------------------------------------
-//
-//------------------------------------------------------------------------------------------
-// Edit the next functions to create interactions
-// Decide which parameters you're using and then use playAudio to play the Audio
-//------------------------------------------------------------------------------------------
-//
-//==========================================================================================
+ //==========================================================================================
+ // INTERACTIONS
+ //------------------------------------------------------------------------------------------
+ //
+ //------------------------------------------------------------------------------------------
+ // Edit the next functions to create interactions
+ // Decide which parameters you're using and then use playAudio to play the Audio
+ //------------------------------------------------------------------------------------------
+ //
+ //==========================================================================================
 
-function accelerationChange(accx, accy, accz) {
-    // playAudio()
-}
+ function accelerationChange(accx, accy, accz) {
+     // playAudio()
+ }
 
-function rotationChange(rotx, roty, rotz) {
-}
+ let targetAngle = 45;
 
-function mousePressed() {
-    playAudio(mouseX/windowWidth)
-    // Use this for debugging from the desktop!
-}
+ function rotationChange(rotx, roty, rotz) {
+     let distance = Math.abs(rotz - targetAngle) % 360;
+     distance = Math.min(distance, 360 - distance);
 
-function deviceMoved() {
-    movetimer = millis();
-    statusLabels[2].style("color", "pink");
-}
+     let beepSpeed = 1 + (1 - distance / 180) * 7;
 
-function deviceTurned() {
-    threshVals[1] = turnAxis;
-}
-function deviceShaken() {
-    shaketimer = millis();
-    statusLabels[0].style("color", "pink");
-    playAudio();
-}
+     volumeOscillator.frequency.value = beepSpeed;
+ }
 
-function getMinMaxParam(address) {
-    const exampleMinMaxParam = findByAddress(dspNodeParams, address);
-    // ALWAYS PAY ATTENTION TO MIN AND MAX, ELSE YOU MAY GET REALLY HIGH VOLUMES FROM YOUR SPEAKERS
-    const [exampleMinValue, exampleMaxValue] = getParamMinMax(exampleMinMaxParam);
-    console.log('Min value:', exampleMinValue, 'Max value:', exampleMaxValue);
-    return [exampleMinValue, exampleMaxValue]
-}
+ function mousePressed() {
+     playAudio();
+     // Use this for debugging from the desktop!
+ }
 
-//==========================================================================================
-// AUDIO INTERACTION
-//------------------------------------------------------------------------------------------
-//
-//------------------------------------------------------------------------------------------
-// Edit here to define your audio controls 
-//------------------------------------------------------------------------------------------
-//
-//==========================================================================================
+ function deviceMoved() {
+     movetimer = millis();
+     statusLabels[2].style("color", "pink");
+ }
 
-function playAudio(pressure) {
-    if (!dspNode) {
-        return;
-    }
-    if (audioContext.state === 'suspended') {
-        return;
-    }
-    console.log(pressure)
-    dspNode.setParamValue("/brass/blower/pressure", pressure)
-}
+ function deviceTurned() {
+     threshVals[1] = turnAxis;
+ }
 
-//==========================================================================================
-// END
-//==========================================================================================
+ function deviceShaken() {
+     shaketimer = millis();
+     statusLabels[0].style("color", "pink");
+ }
+
+ function getMinMaxParam(address) {
+     const exampleMinMaxParam = findByAddress(dspNodeParams, address);
+     // ALWAYS PAY ATTENTION TO MIN AND MAX, ELSE YOU MAY GET REALLY HIGH VOLUMES FROM YOUR SPEAKERS
+     const [exampleMinValue, exampleMaxValue] = getParamMinMax(exampleMinMaxParam);
+     console.log('Min value:', exampleMinValue, 'Max value:', exampleMaxValue);
+     return [exampleMinValue, exampleMaxValue]
+ }
+
+ //==========================================================================================
+ // AUDIO INTERACTION
+ //------------------------------------------------------------------------------------------
+ //
+ //------------------------------------------------------------------------------------------
+ // Edit here to define your audio controls
+ //------------------------------------------------------------------------------------------
+ //
+ //==========================================================================================
+
+ function playAudio() {
+     audioContext.resume();
+ }
+
+ //==========================================================================================
+ // END
+ //==========================================================================================
